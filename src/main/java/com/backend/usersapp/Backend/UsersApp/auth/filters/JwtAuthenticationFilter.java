@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import static com.backend.usersapp.Backend.UsersApp.auth.TokenJwtConfig.*;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -51,10 +52,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			throws IOException, ServletException {
 		String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
 				.getUsername();
-		String originalInput = "algun_token." + username;
+		String originalInput = SECRET_KEY + "." + username;
 		String token = Base64.getEncoder().encodeToString(originalInput.getBytes());
 
-		response.addHeader("Authorization", "Bearer " + token);
+		response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("token", token);
