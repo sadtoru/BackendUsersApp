@@ -2,6 +2,7 @@ package com.backend.usersapp.Backend.UsersApp.auth.filters;
 
 import com.backend.usersapp.Backend.UsersApp.models.entities.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import static com.backend.usersapp.Backend.UsersApp.auth.TokenJwtConfig.*;
 
 import java.io.IOException;
-import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,8 +53,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			throws IOException, ServletException {
 		String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
 				.getUsername();
-		String originalInput = SECRET_KEY + "." + username;
-		String token = Base64.getEncoder().encodeToString(originalInput.getBytes());
+		//generar/firmar el token
+		String token = Jwts.builder()
+				.subject(username)
+				.signWith(SECRET_KEY)
+				.issuedAt(new Date())
+				.expiration(new Date(System.currentTimeMillis() + 3600000))
+				.compact();
+
 
 		response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
 
