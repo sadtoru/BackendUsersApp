@@ -1,5 +1,6 @@
 package com.backend.usersapp.Backend.UsersApp.controllers;
 
+import com.backend.usersapp.Backend.UsersApp.models.dto.UserDto;
 import com.backend.usersapp.Backend.UsersApp.models.entities.User;
 import com.backend.usersapp.Backend.UsersApp.models.request.UserRequest;
 import com.backend.usersapp.Backend.UsersApp.services.UserService;
@@ -24,13 +25,13 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public List<User> list(){
+    public List<UserDto> list(){
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> show(@PathVariable Long id){
-        Optional<User> optionalUser = userService.findById(id);
+        Optional<UserDto> optionalUser = userService.findById(id);
         if(optionalUser.isPresent()){
             return ResponseEntity.ok(optionalUser.orElseThrow());
         }
@@ -50,7 +51,7 @@ public class UserController {
         if(result.hasErrors()){
             return validation(result);
         }
-        Optional<User> o = userService.update(user, id);
+        Optional<UserDto> o = userService.update(user, id);
         if (o.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(o.orElseThrow());
         }
@@ -59,7 +60,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> remove(@PathVariable Long id){
-        Optional<User> o = userService.findById(id);
+        Optional<UserDto> o = userService.findById(id);
         if (o.isPresent()){
             userService.remove(id);
             return ResponseEntity.noContent().build();

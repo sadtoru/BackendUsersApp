@@ -1,5 +1,7 @@
 package com.backend.usersapp.Backend.UsersApp.services;
 
+import com.backend.usersapp.Backend.UsersApp.models.dto.UserDto;
+import com.backend.usersapp.Backend.UsersApp.models.dto.mapper.DtoMapperUser;
 import com.backend.usersapp.Backend.UsersApp.models.entities.Role;
 import com.backend.usersapp.Backend.UsersApp.models.request.UserRequest;
 import com.backend.usersapp.Backend.UsersApp.repositories.RoleRepository;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements  UserService{
@@ -28,18 +31,24 @@ public class UserServiceImpl implements  UserService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return (List<User>) userRepository.findAll();
+    public List<UserDto> findAll() {
+        List<User> users = (List<User>) userRepository.findAll();
+        return users
+                .stream()
+                .map(user -> DtoMapperUser.builder().setUser(user).build())
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    @Transactional(readOnly = true)
+    public Optional<UserDto> findById(Long id) {
+        return userRepository.findById(id)
+                .map(user -> DtoMapperUser.builder().setUser(user).build());
     }
 
     @Override
     @Transactional
-    public User save(User user) {
+    public UserDto save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Optional<Role> optionalUser = roleRepository.findByName("ROLE_USER");
 
@@ -50,25 +59,27 @@ public class UserServiceImpl implements  UserService{
         }
         user.setRoles(roleList);
 
-        return userRepository.save(user);
+        return DtoMapperUser.builder().setUser(userRepository.save(user)).build();
+    }
+
+    @Override
+    @Transactional
+    public Optional<UserDto> update(UserRequest user, Long id) {
+        Optional<User> o = userRepository.findById(id);
+        User userOptional = null;
+        if (o.isPresent()) {
+            User userDb = o.orElseThrow();
+            userDb.setUsername(user.getUsername());
+            userDb.setEmail(user.getEmail());
+            userOptional = userRepository.save(userDb);
+        }
+        return Optional.ofNullable(DtoMapperUser.builder().setUser(userOptional).build());
     }
 
     @Override
     @Transactional
     public void remove(Long id) {
         userRepository.deleteById(id);
-    }
-
-    @Override
-    public Optional<User> update(UserRequest user, Long id) {
-        Optional<User> o = this.findById(id);
-        if (o.isPresent()) {
-            User userDb = o.orElseThrow();
-            userDb.setUsername(userDb.getUsername());
-            userDb.setEmail(userDb.getEmail());
-            return Optional.of(this.save(userDb));
-        }
-        return Optional.empty();
     }
 
 
