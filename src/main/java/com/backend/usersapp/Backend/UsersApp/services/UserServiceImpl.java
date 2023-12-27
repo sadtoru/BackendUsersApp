@@ -1,6 +1,7 @@
 package com.backend.usersapp.Backend.UsersApp.services;
 
 import com.backend.usersapp.Backend.UsersApp.models.entities.Role;
+import com.backend.usersapp.Backend.UsersApp.models.request.UserRequest;
 import com.backend.usersapp.Backend.UsersApp.repositories.RoleRepository;
 import com.backend.usersapp.Backend.UsersApp.repositories.UserRepository;
 import com.backend.usersapp.Backend.UsersApp.models.entities.User;
@@ -59,7 +60,7 @@ public class UserServiceImpl implements  UserService{
     }
 
     @Override
-    public Optional<User> update(User user, Long id) {
+    public Optional<User> update(UserRequest user, Long id) {
         Optional<User> o = this.findById(id);
         if (o.isPresent()) {
             User userDb = o.orElseThrow();

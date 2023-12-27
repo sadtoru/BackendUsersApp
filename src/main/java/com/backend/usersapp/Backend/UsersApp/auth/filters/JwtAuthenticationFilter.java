@@ -57,15 +57,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			throws IOException, ServletException {
 		String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
 				.getUsername();
+
 		//obtener roles
 		Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 		boolean isAdmin = roles.stream().anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
 
 		ClaimsBuilder claims = Jwts.claims();
+
 		//convertir objeto a json
 		claims.add("authorities", new ObjectMapper().writeValueAsString(roles));
 		claims.add("isAdmin", isAdmin);
 		claims.add("username", username);
+
 		//generar/firmar el token
 		String token = Jwts.builder()
 				.claims(claims.build())
